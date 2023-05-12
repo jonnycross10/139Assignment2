@@ -172,18 +172,31 @@ int main(int argc, char *argv[]) {
     // start time point, proc #
     Queue* queue = create_queue();
     
+    FILE *fp;
+    char OUTNAME[50] = "output";
+    strcat(OUTNAME, FILENUMBER);
+    strcat(OUTNAME, ".txt");
+    fp = fopen(OUTNAME, "w");
+    if (fp == NULL) {
+        printf("Error opening file.\n");
+        return 1;
+    }
     
     if(state == RR){
+        char *firstLine = "RR";
+        fprintf(fp, "%s %d\n",firstLine, quantumTime);
         //add procs to queue
         for (int i=0; i<totalProcs;i++){
             enqueue(queue, procs[i][0]);
         }
         printf("size of queue: %d\n",size(queue));
         //loop until queue is empty
+        int output[1][1];
         int totalBurst =0;
         int currentBurst = 0;
         int activeProc = dequeue(queue);
         activeProc--;
+        fprintf(fp, "%d %d\n",totalBurst,activeProc+1);
         while(size(queue)>0||procs[activeProc][3]>0){
             //if its burst time is completed
             if(procs[activeProc][2] ==0){
@@ -195,6 +208,7 @@ int main(int argc, char *argv[]) {
                 activeProc = dequeue(queue);
                 activeProc--;
                 currentBurst=0;
+                fprintf(fp, "%d %d\n",totalBurst,activeProc+1);
             }
             //if its quantum time is up
             else if (currentBurst>=quantumTime){
@@ -207,6 +221,7 @@ int main(int argc, char *argv[]) {
                 activeProc--;
                 //reset the current burst
                 currentBurst =0;
+                fprintf(fp, "%d %d\n",totalBurst,activeProc+1);
             }
 
             //decrement the process' burst time
@@ -223,6 +238,13 @@ int main(int argc, char *argv[]) {
             currentBurst++;
             totalBurst++;
         }
+        //calculate average wait time
+        int sum=0;
+        for(int i=0; i<totalProcs;i++){
+            sum = sum + procs[i][4];
+        }
+        int average = sum / totalProcs;
+        fprintf(fp, "AVG waiting time is %d\n",average);
 
     }
     else if(state == SJF){
