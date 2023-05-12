@@ -371,14 +371,20 @@ int main(int argc, char *argv[]) {
         int time =0;
         int doneCount =0;
         int currentProcs[totalProcs][2];
+        //initialize current proc array
+        for(int i=0;i<totalProcs;i++){
+            currentProcs[i][0] = 999;
+            currentProcs[i][1] = 999;
+        }
         int currProcCount =0;
         while (doneCount<totalProcs){
             //loop through procs and check for new
             for(int i=0;i<totalProcs;i++){
                 if(time==procs[i][1]){
                     currentProcs[i][0] = procs[i][0]; //adding proc number
-                    currentProcs[i][1] = procs[i][3]; //adding priority number
+                    currentProcs[i][1] = procs[i][3]; //adding burst time
                     currProcCount++;
+                    printf("Adding process %d\n",procs[i][0]);
                 }
             }
             //sort current procs based on burst time
@@ -408,7 +414,12 @@ int main(int argc, char *argv[]) {
             if(procs[activeProc][2]==0){
                 //remove first row 
                 arrLen = sizeof(currentProcs) / sizeof(currentProcs[0]);
-                currentProcs[0][1] = 99;
+                //set the current process'burst time to 99 but it could have been sorted
+                for(int i=0; i<totalProcs;i++){
+                    if(currentProcs[i][0]==procs[activeProc][0]){
+                        currentProcs[i][1] = 99;
+                    }
+                }
                 int i, j, temp;
                 for(i=0; i<arrLen; i++) {
                     for(j=i+1; j<arrLen; j++) {
