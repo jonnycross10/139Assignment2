@@ -165,7 +165,6 @@ int main(int argc, char *argv[]) {
                 i = i +1;
             }
             procs[lineNo-2][4] = 0;
-            printf("procs waiting time: %d\n", procs[lineNo-2][4]);
         }
         lineNo = lineNo + 1;
     }
@@ -183,17 +182,16 @@ int main(int argc, char *argv[]) {
         //loop until queue is empty
         int totalBurst =0;
         int currentBurst = 0;
-        int activeProc = -1;
-        while(size(queue)>0){
-            
-            //if it's the first process
-            if (activeProc<0){
-                activeProc = dequeue(queue);
-                activeProc--;
-            }
+        int activeProc = dequeue(queue);
+        activeProc--;
+        while(size(queue)>0||procs[activeProc][3]>0){
             //if its burst time is completed
-            else if(procs[activeProc][2] ==0){
+            if(procs[activeProc][2] ==0){
                 printf("proc %d is finished\n", activeProc+1);
+                if(is_empty(queue)){
+                    //done if last proc
+                    break;
+                }
                 activeProc = dequeue(queue);
                 activeProc--;
                 currentBurst=0;
@@ -211,13 +209,16 @@ int main(int argc, char *argv[]) {
                 currentBurst =0;
             }
 
-            // active process is now set correctly
-            if (activeProc<0){
-                break;
-            }
             //decrement the process' burst time
             procs[activeProc][2]--;
             
+            //increment the other process' wait time
+            for(int i=0;i<totalProcs;i++){
+                //if not the active process and is still in queue
+                if(i!=activeProc && procs[i][2]>0){
+                    procs[i][4]++;
+                }
+            }
             printf("current active process: %d\n", activeProc+1);
             currentBurst++;
             totalBurst++;
@@ -233,7 +234,8 @@ int main(int argc, char *argv[]) {
     else if(state == PR_withPREMP){
         
     }
-
+    printf("Finished\n");
+    printf("Wait time for process 2 is: %d\n", procs[2][4]);
     fclose(file);
     return 0;
 }
