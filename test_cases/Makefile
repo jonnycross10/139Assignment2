@@ -12,9 +12,8 @@ main:
 	./main 1
 
 main-debug: 
-	gcc -g producer.c -lrt -o producer
-	gcc -g consumer.c -lrt -o consumer
-	gdb --args producer 4 10 3
+	gcc -g main.c -lrt -o main
+	gdb --args main 1
 
 clean:
 	rm -f main main-debug
