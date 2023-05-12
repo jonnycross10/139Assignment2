@@ -1,6 +1,13 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+/*
+** Name: Jonathan Cross
+** Section 03
+*/
+
+
+// FIFO QUEUE IMPLEMENTATION
 
 // Define a struct for a queue node
 typedef struct node {
@@ -93,8 +100,11 @@ void remove_row(int arr[][2], int num_rows, int row_index) {
         }
     }
 }
+//END QUEUE IMPLEMENTATION
 
 int main(int argc, char *argv[]) {
+    //START OF CODE 
+
     if (argc != 2){
         printf("incorrect number of CLargs");
         return 1;
@@ -570,7 +580,6 @@ int main(int argc, char *argv[]) {
         fprintf(fp, "AVG waiting time is %f\n",average);
     }
     printf("Finished\n");
-    printf("Wait time for process 1 is: %d\n", procs[0][4]);
     fclose(file);
     return 0;
 }
