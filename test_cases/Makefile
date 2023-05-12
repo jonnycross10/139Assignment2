@@ -13,7 +13,7 @@ main:
 
 main-debug: 
 	gcc -g main.c -lrt -o main
-	gdb --args main 1
+	gdb --args main 2
 
 clean:
 	rm -f main main-debug

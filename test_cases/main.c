@@ -78,6 +78,22 @@ int size(Queue* queue) {
     return queue->size;
 }
 
+// function to compare integers for qsort()
+int compare(const void *a, const void *b) {
+    int *x = (int *)a;
+    int *y = (int *)b;
+    return *x - *y;
+}
+
+void remove_row(int arr[][2], int num_rows, int row_index) {
+    // Shift all rows after the one to be removed up by one
+    for (int i = row_index; i < num_rows- 1; i++) {
+        for (int j = 0; j < 3; j++) {
+            arr[i][j] = arr[i+1][j];
+        }
+    }
+}
+
 int main(int argc, char *argv[]) {
     if (argc != 2){
         printf("incorrect number of CLargs");
@@ -111,6 +127,7 @@ int main(int argc, char *argv[]) {
             //check first token to see what type of 
             char * tok = strtok(line, " ");
             int i =0;
+            printf("type: %s", tok);
             while(tok != NULL){
                 //do operation
                 if(i==0){
@@ -118,7 +135,7 @@ int main(int argc, char *argv[]) {
                         state = RR;
                         printf("scheduling type is RR\n");
                     }
-                    else if(strcmp(tok,"SJF")==0) {
+                    else if(strcmp(tok,"SJF\n")==0) {
                         state = SJF;
                         printf("scheduling type is SJF\n");
                     }
@@ -248,16 +265,102 @@ int main(int argc, char *argv[]) {
 
     }
     else if(state == SJF){
+        char *firstLine = "SJF";
+        fprintf(fp, "%s %d\n",firstLine, quantumTime);
+        int activeProc = 0;
+        int time =0;
+        int doneCount =0;
+        int currentProcs[totalProcs][2];
+        int currProcCount =0;
+        while (doneCount<totalProcs){
+            //loop through procs and check for new
+            for(int i=0;i<totalProcs;i++){
+                if(time==procs[i][1]){
+                    currentProcs[i][0] = procs[i][0]; //adding proc number
+                    currentProcs[i][1] = procs[i][2]; //adding burst time
+                    currProcCount++;
+                }
+            }
+            //sort current procs based on burst time
+            int arrLen = sizeof(currentProcs) / sizeof(currentProcs[0]);
+            int i, j, temp;
+            for(i=0; i<arrLen; i++) {
+                for(j=i+1; j<arrLen; j++) {
+                    if(currentProcs[i][1] > currentProcs[j][1]) {
+                        temp = currentProcs[i][0];
+                        currentProcs[i][0] = currentProcs[j][0];
+                        currentProcs[j][0] = temp;
 
+                        temp = currentProcs[i][1];
+                        currentProcs[i][1] = currentProcs[j][1];
+                        currentProcs[j][1] = temp;
+                    }
+                }
+            }
+            if(time==0){
+                //if its the first iteration set the active to sj
+                activeProc = currentProcs[0][0]-1;
+                printf("setting active process to: %d\n", activeProc+1);
+                fprintf(fp, "%d %d\n",time,activeProc+1);
+            } 
+            //printf("last procId is %d\n", currentProcs[3][0]);
+            // check for a finished process
+            if(procs[activeProc][2]==0){
+                //remove first row 
+                arrLen = sizeof(currentProcs) / sizeof(currentProcs[0]);
+                currentProcs[0][1] = 99;
+                int i, j, temp;
+                for(i=0; i<arrLen; i++) {
+                    for(j=i+1; j<arrLen; j++) {
+                        if(currentProcs[i][1] > currentProcs[j][1]) {
+                            temp = currentProcs[i][0];
+                            currentProcs[i][0] = currentProcs[j][0];
+                            currentProcs[j][0] = temp;
+
+                            temp = currentProcs[i][1];
+                            currentProcs[i][1] = currentProcs[j][1];
+                            currentProcs[j][1] = temp;
+                        }
+                    }
+                }
+                //set new active process to first in current procs
+                activeProc = currentProcs[0][0]-1; 
+                printf("setting active process to: %d\n", activeProc+1);
+                //increment done
+                doneCount++;
+                if(doneCount==totalProcs){
+                    break;
+                }
+                fprintf(fp, "%d %d\n",time,activeProc+1);
+            }
+            //decrement process' burst
+            procs[activeProc][2]--;
+            printf("current active process: %d\n", activeProc+1);
+            //increment other process' wait time
+            arrLen = sizeof(currentProcs) / sizeof(currentProcs[0]);
+            for(int i=0;i<arrLen;i++){
+                if(i != activeProc && procs[i][2]>0){
+                    procs[i][4]++;
+                }
+            }
+            time++;
+        }
+        //calculate average wait time
+        int sum=0;
+        for(int i=0; i<totalProcs;i++){
+            sum = sum + procs[i][4];
+        }
+        int average = sum / totalProcs;
+        fprintf(fp, "AVG waiting time is %d\n",average);
     }
     else if(state == PR_noPREMP){
-
+ 
     }
     else if(state == PR_withPREMP){
         
     }
     printf("Finished\n");
-    printf("Wait time for process 2 is: %d\n", procs[2][4]);
+    printf("Wait time for process 1 is: %d\n", procs[0][4]);
     fclose(file);
     return 0;
 }
